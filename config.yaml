@@ -1,0 +1,59 @@
+# CBDL Pipeline Configuration
+# All hyperparameters for the Cross-Body Dependency Learning pipeline
+
+seed: 42
+
+data:
+  n_subjects: 200          # Total subjects (100 healthy + 100 symptomatic)
+  fs: 100                  # Sampling frequency (Hz)
+  duration: 60             # Duration per subject (seconds)
+  output_dir: "data/synthetic"
+  processed_dir: "data/processed"
+
+preprocessing:
+  bandpass_low: 0.5        # Hz
+  bandpass_high: 20.0      # Hz
+  notch_freq: 50.0         # Hz
+  window_samples: 200      # 2 seconds at 100 Hz
+  stride_samples: 50       # 0.5 second stride
+  baseline_fraction: 0.2   # Fraction of windows used for normalization baseline
+  max_nan_gap_ms: 200      # Max interpolatable NaN gap in ms
+
+model:
+  embed_dim: 128           # Per-stream embedding dimension
+  cross_body_dim: 512      # Fused cross-body embedding dimension
+  n_streams: 4             # Number of stream encoders
+  n_heads: 4               # Attention heads
+  gat_layers: 2            # GAT depth
+  lstm_hidden: 128         # BiLSTM hidden size
+  lstm_layers: 2           # BiLSTM depth
+  dropout: 0.2             # Dropout rate
+
+training:
+  lr: 0.0003               # Adam learning rate
+  batch_size: 64
+  epochs: 10
+  weight_decay: 0.0001
+  mask_ratio: 0.25         # Fraction of timesteps to mask
+
+  # VICReg loss weights
+  vicreg_lambda: 25.0      # Invariance term weight
+  vicreg_mu: 25.0          # Variance term weight
+  vicreg_nu: 1.0           # Covariance term weight
+
+  # Contrastive learning
+  temperature: 0.07        # InfoNCE temperature
+
+biomarkers:
+  output_file: "output/biomarkers.csv"
+
+explainability:
+  n_mc_samples: 10         # Monte Carlo dropout samples
+  shap_samples: 50         # Background samples for KernelSHAP
+
+evaluation:
+  test_fraction: 0.3       # Fraction of subjects for evaluation
+  cv_folds: 5              # Cross-validation folds
+
+output_dir: "output"
+models_dir: "checkpoints"
