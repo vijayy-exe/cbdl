@@ -1,0 +1,654 @@
+<title>Motor Symptom Report</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600;8..60,700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+  :root {
+    color-scheme: light;
+    --page:        #f9f9f7;
+    --surface:     #ffffff;
+    --surface-2:   #f2f3f0;
+    --ink:         #14181a;
+    --ink-2:       #52514e;
+    --muted:       #898781;
+    --line:        #e1e0d9;
+    --line-strong: #c3c2b7;
+
+    --accent:       #0e6e67;
+    --accent-ink:   #063e3a;
+    --accent-wash:  #e6f2f0;
+
+    --good:      #0ca30c;
+    --good-wash: #e7f6e2;
+    --warning:      #b8792e;
+    --warning-wash: #faf1e2;
+    --serious:      #c15a3a;
+    --serious-wash: #fbe9e2;
+    --critical:      #d03b3b;
+    --critical-wash: #fbe4e2;
+
+    --seq-100: #cde2fb; --seq-250: #86b6ef; --seq-400: #3987e5;
+    --seq-450: #2a78d6; --seq-500: #256abf; --seq-600: #184f95;
+
+    --font-display: "Source Serif 4", Georgia, "Times New Roman", serif;
+    --font-body: "IBM Plex Sans", system-ui, -apple-system, sans-serif;
+    --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", monospace;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --page:        #0d0e0d;
+      --surface:     #17191a;
+      --surface-2:   #1e2121;
+      --ink:         #f2f2f0;
+      --ink-2:       #c3c2b7;
+      --muted:       #8f8d87;
+      --line:        #2c2e2c;
+      --line-strong: #3a3c3a;
+
+      --accent:      #2fa89f;
+      --accent-ink:  #bdeae5;
+      --accent-wash: #12302d;
+
+      --good:      #3fbf3f;
+      --good-wash: #10281a;
+      --warning:      #e0a04d;
+      --warning-wash: #2e2312;
+      --serious:      #e2825e;
+      --serious-wash: #2f1c14;
+      --critical:      #e66767;
+      --critical-wash: #331616;
+
+      --seq-100: #14304f; --seq-250: #1c5cab; --seq-400: #3987e5;
+      --seq-450: #5598e7; --seq-500: #6da7ec; --seq-600: #9ec5f4;
+    }
+  }
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --page:        #0d0e0d;
+    --surface:     #17191a;
+    --surface-2:   #1e2121;
+    --ink:         #f2f2f0;
+    --ink-2:       #c3c2b7;
+    --muted:       #8f8d87;
+    --line:        #2c2e2c;
+    --line-strong: #3a3c3a;
+
+    --accent:      #2fa89f;
+    --accent-ink:  #bdeae5;
+    --accent-wash: #12302d;
+
+    --good:      #3fbf3f;
+    --good-wash: #10281a;
+    --warning:      #e0a04d;
+    --warning-wash: #2e2312;
+    --serious:      #e2825e;
+    --serious-wash: #2f1c14;
+    --critical:      #e66767;
+    --critical-wash: #331616;
+
+    --seq-100: #14304f; --seq-250: #1c5cab; --seq-400: #3987e5;
+    --seq-450: #5598e7; --seq-500: #6da7ec; --seq-600: #9ec5f4;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    background: var(--page);
+    color: var(--ink);
+    font-family: var(--font-body);
+    margin: 0;
+    padding: 0 20px 64px;
+  }
+  .wrap { max-width: 1080px; margin: 0 auto; }
+
+  /* ── Masthead ── */
+  .masthead {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    padding: 28px 0 22px;
+    border-bottom: 1px solid var(--line);
+    flex-wrap: wrap;
+  }
+  .mark { flex-shrink: 0; }
+  .masthead h1 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 26px;
+    margin: 0 0 2px;
+    text-wrap: balance;
+  }
+  .masthead .sub {
+    color: var(--ink-2);
+    font-size: 13px;
+    letter-spacing: 0.01em;
+  }
+  .masthead .sub .v {
+    font-family: var(--font-mono);
+    color: var(--muted);
+  }
+  .masthead-right {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .patient-id {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--ink-2);
+    text-align: right;
+    line-height: 1.5;
+  }
+  .patient-id b { color: var(--ink); font-size: 15px; }
+
+  .risk-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 7px 14px;
+    border-radius: 100px;
+    font-family: var(--font-body);
+    font-weight: 600;
+    font-size: 13px;
+    white-space: nowrap;
+  }
+  .risk-pill .dot { width: 8px; height: 8px; border-radius: 50%; }
+
+  /* ── Flow strip ── */
+  .flow {
+    display: flex;
+    gap: 0;
+    margin: 18px 0 8px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+  }
+  .flow-step {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px 8px 0;
+    flex-shrink: 0;
+    font-size: 11.5px;
+    color: var(--muted);
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    font-weight: 600;
+  }
+  .flow-step .n {
+    font-family: var(--font-mono);
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    border: 1px solid var(--line-strong);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10.5px;
+    color: var(--ink-2);
+    flex-shrink: 0;
+  }
+  .flow-step:after {
+    content: "";
+    width: 20px; height: 1px;
+    background: var(--line);
+    margin-left: 8px;
+  }
+  .flow-step:last-child:after { display: none; }
+
+  /* ── Grid & cards ── */
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 18px; }
+  .grid.full { grid-template-columns: 1fr; }
+  @media (max-width: 760px) { .grid { grid-template-columns: 1fr; } }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 22px 24px;
+  }
+  .card.span2 { grid-column: 1 / -1; }
+
+  .card h2 {
+    font-family: var(--font-display);
+    font-size: 17px;
+    font-weight: 600;
+    margin: 0 0 4px;
+    display: flex;
+    align-items: center;
+    gap: 9px;
+  }
+  .card h2 .idx {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--accent);
+    background: var(--accent-wash);
+    border-radius: 5px;
+    padding: 2px 6px;
+    font-weight: 600;
+  }
+  .card .desc { color: var(--ink-2); font-size: 13px; margin: 0 0 16px; line-height: 1.5; }
+  .card .desc.tight { margin-bottom: 10px; }
+
+  /* ── Overall assessment ── */
+  .assessment-line {
+    font-family: var(--font-display);
+    font-size: 15.5px;
+    line-height: 1.6;
+    color: var(--ink);
+  }
+  .assessment-line b { font-weight: 600; }
+
+  /* ── Diagnostic donut ── */
+  .diag-row { display: flex; gap: 22px; align-items: center; }
+  .donut {
+    width: 128px; height: 128px; border-radius: 50%;
+    flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    position: relative;
+  }
+  .donut .hole {
+    width: 78px; height: 78px; border-radius: 50%;
+    background: var(--surface);
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+  }
+  .donut .hole .pct { font-family: var(--font-mono); font-weight: 600; font-size: 19px; }
+  .donut .hole .lbl { font-size: 9.5px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+
+  .legend { display: flex; flex-direction: column; gap: 9px; flex: 1; }
+  .legend-row { display: flex; align-items: center; gap: 9px; font-size: 13px; }
+  .legend-row .sw { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+  .legend-row .name { flex: 1; color: var(--ink); }
+  .legend-row .val { font-family: var(--font-mono); font-weight: 600; font-size: 13px; }
+  .legend-row.predicted .name { font-weight: 600; }
+
+  .conf-note {
+    margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line);
+    font-size: 12px; color: var(--muted); line-height: 1.5;
+  }
+  .conf-note .mono { font-family: var(--font-mono); color: var(--ink-2); }
+
+  /* ── Bars (generic magnitude bars) ── */
+  .barlist { display: flex; flex-direction: column; gap: 11px; }
+  .bar-row .top { display: flex; justify-content: space-between; font-size: 12.5px; margin-bottom: 4px; }
+  .bar-row .top .name { color: var(--ink); }
+  .bar-row .top .val { font-family: var(--font-mono); color: var(--ink-2); font-weight: 500; }
+  .bar-track { height: 8px; background: var(--surface-2); border-radius: 4px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 4px; background: var(--seq-450); }
+  .bar-fill.dim { background: var(--line-strong); opacity: 0.6; }
+
+  .subhead {
+    font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em;
+    color: var(--muted); font-weight: 600; margin: 18px 0 10px;
+  }
+  .subhead:first-child { margin-top: 0; }
+
+  /* ── Motor pattern indicators ── */
+  .indicator { display: flex; gap: 14px; align-items: flex-start; padding: 12px 0; border-bottom: 1px solid var(--line); }
+  .indicator:last-child { border-bottom: none; }
+  .indicator .gauge {
+    width: 46px; height: 46px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-mono); font-size: 11px; font-weight: 600;
+  }
+  .indicator .body { flex: 1; }
+  .indicator .name { font-size: 13.5px; font-weight: 600; color: var(--ink); margin-bottom: 2px; }
+  .indicator .meta { font-size: 12px; color: var(--ink-2); line-height: 1.5; }
+  .sev-chip {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 100px;
+    margin-left: 6px;
+  }
+
+  .exploratory-note {
+    font-size: 11.5px; color: var(--muted); background: var(--surface-2);
+    border-radius: 7px; padding: 9px 12px; margin-top: 14px; line-height: 1.5;
+  }
+
+  /* ── Cross-body ── */
+  .lag-compare { display: flex; flex-direction: column; gap: 10px; }
+  .lag-row { display: grid; grid-template-columns: 52px 1fr 1fr; gap: 10px; align-items: center; font-size: 12px; }
+  .lag-row .lag-label { font-family: var(--font-mono); color: var(--ink-2); }
+  .mini-track { height: 16px; background: var(--surface-2); border-radius: 4px; position: relative; overflow: hidden; }
+  .mini-fill { height: 100%; border-radius: 4px; }
+  .mini-fill.subject { background: var(--accent); }
+  .mini-fill.cohort { background: var(--line-strong); }
+  .lag-legend { display: flex; gap: 16px; font-size: 11px; color: var(--muted); margin-top: 8px; }
+  .lag-legend .sw { width: 9px; height: 9px; border-radius: 2px; display: inline-block; margin-right: 5px; vertical-align: -1px; }
+
+  /* ── Data coverage table ── */
+  .cov-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .cov-table td { padding: 10px 0; border-bottom: 1px solid var(--line); vertical-align: top; }
+  .cov-table tr:last-child td { border-bottom: none; }
+  .cov-table .src { font-weight: 600; width: 150px; white-space: nowrap; }
+  .cov-table .note { color: var(--ink-2); font-size: 12.5px; line-height: 1.5; }
+  .status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 8px; }
+
+  /* ── Recommended action ── */
+  .action-item { display: flex; gap: 11px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+  .action-item:last-child { border-bottom: none; }
+  .action-item .k { font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); width: 130px; flex-shrink: 0; padding-top: 1px; }
+  .action-item .v { font-size: 13.5px; color: var(--ink); line-height: 1.5; }
+
+  /* ── Technical info ── */
+  .tech-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 20px; font-size: 12.5px; }
+  .tech-grid dt { color: var(--muted); margin-bottom: 2px; }
+  .tech-grid dd { margin: 0; font-family: var(--font-mono); color: var(--ink); }
+
+  /* ── Disclaimer ── */
+  .disclaimer {
+    margin-top: 18px;
+    border: 1px solid var(--line-strong);
+    background: var(--surface-2);
+    border-radius: 10px;
+    padding: 18px 22px;
+    font-size: 12.5px;
+    color: var(--ink-2);
+    line-height: 1.6;
+  }
+  .disclaimer .head {
+    font-family: var(--font-body);
+    font-weight: 700;
+    color: var(--ink);
+    text-transform: uppercase;
+    font-size: 11.5px;
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+    display: flex; align-items: center; gap: 7px;
+  }
+
+  footer.meta {
+    text-align: center; color: var(--muted); font-size: 11px;
+    margin-top: 28px; font-family: var(--font-mono);
+  }
+</style>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <svg class="mark" width="40" height="40" viewBox="0 0 40 40" fill="none">
+      <circle cx="20" cy="20" r="19" stroke="var(--accent)" stroke-width="1.4" opacity="0.35"/>
+      <path d="M6 24 C 12 24, 12 14, 18 14 S 24 26, 30 26" stroke="var(--accent)" stroke-width="2.1" stroke-linecap="round" fill="none"/>
+      <path d="M6 16 C 12 16, 12 26, 18 26 S 24 14, 30 14" stroke="var(--accent-ink)" stroke-width="2.1" stroke-linecap="round" fill="none" opacity="0.55"/>
+    </svg>
+    <div>
+      <h1>Motor Symptom Monitoring Report</h1>
+      <div class="sub">Cross-Body Dependency Learning &nbsp;·&nbsp; <span class="v">research prototype, phases 2&ndash;6</span></div>
+    </div>
+    <div class="masthead-right">
+      <div class="patient-id" id="patientIdBlock"></div>
+      <div class="risk-pill" id="riskPill"></div>
+    </div>
+  </header>
+
+  <nav class="flow" id="flowStrip"></nav>
+
+  <div class="grid">
+
+    <section class="card">
+      <h2><span class="idx">01</span>Patient &amp; Session</h2>
+      <div id="patientCard"></div>
+    </section>
+
+    <section class="card">
+      <h2><span class="idx">02</span>Overall Assessment</h2>
+      <p class="assessment-line" id="overallLine"></p>
+    </section>
+
+    <section class="card span2">
+      <h2><span class="idx">03</span>Motor Symptom Probability</h2>
+      <p class="desc">Calibrated probability of a motor-decline pattern (Phase 5 isotonic calibration, fit on validation data) — a symptom-probability estimate, not a diagnostic classification. See <span class="mono" style="font-family:var(--font-mono)">§11</span> for raw vs. calibrated numbers.</p>
+      <div class="diag-row">
+        <div class="donut" id="donut"></div>
+        <div class="legend" id="diagLegend"></div>
+      </div>
+      <div class="conf-note" id="confNote"></div>
+    </section>
+
+    <section class="card">
+      <h2><span class="idx">04</span>Motor Pattern Indicators</h2>
+      <p class="desc tight">Signal-derived from this patient's raw wrist-IMU recording, shown as a percentile against the 328-subject training population.</p>
+      <div id="motorPatterns"></div>
+      <div class="exploratory-note">Exploratory, non-clinical indicators computed directly from raw sensor signal (FFT band power, RMS, cross-channel correlation) — not validated diagnostic measures.</div>
+    </section>
+
+    <section class="card">
+      <h2><span class="idx">05</span>Cross-Body Dependency</h2>
+      <p class="desc tight">This patient's own Lagged Cross-Attention weights (finger vs. a fixed population gait representation — see coverage note in §07).</p>
+      <div class="lag-compare" id="lagCompare"></div>
+      <div class="lag-legend">
+        <span><span class="sw" style="background:var(--accent)"></span>This patient</span>
+        <span><span class="sw" style="background:var(--line-strong)"></span>Cohort average (test set)</span>
+      </div>
+      <p class="desc" style="margin-top:12px; margin-bottom:0;" id="lagExplain"></p>
+    </section>
+
+    <section class="card span2">
+      <h2><span class="idx">06</span>Model Explainability</h2>
+      <p class="desc">SHAP attribution (GradientExplainer, this patient's own predicted class), end-to-end through the full frozen pipeline.</p>
+      <div class="grid full" style="margin-top:0; grid-template-columns: 1fr 1fr;">
+        <div>
+          <div class="subhead">By IMU channel</div>
+          <div class="barlist" id="shapChannels"></div>
+        </div>
+        <div>
+          <div class="subhead">By PADS task</div>
+          <div class="barlist" id="shapTasks"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2><span class="idx">07</span>Data Coverage</h2>
+      <table class="cov-table" id="coverageTable"></table>
+    </section>
+
+    <section class="card">
+      <h2><span class="idx">08</span>Trend / Monitoring</h2>
+      <div id="trendBlock"></div>
+    </section>
+
+    <section class="card">
+      <h2><span class="idx">09</span>Recommended Action</h2>
+      <div id="actionList"></div>
+    </section>
+
+    <section class="card">
+      <h2><span class="idx">10</span>Technical Information</h2>
+      <dl class="tech-grid" id="techGrid"></dl>
+    </section>
+
+    <section class="card span2">
+      <div class="disclaimer">
+        <div class="head">⚠ Clinical Disclaimer</div>
+        This report is generated by an AI-based research model (CBDL) analyzing multi-modal motor-signal data. It is a screening/research output only and <b>does not constitute a medical diagnosis</b>. Final interpretation and any clinical decisions must be made by a qualified healthcare professional, in conjunction with a full clinical assessment.
+      </div>
+    </section>
+
+  </div>
+
+  <footer class="meta">CBDL · Cross-Body Dependency Learning · Report generated locally from trained model checkpoints</footer>
+</div>
+
+<script id="report-data" type="application/json">
+{"subject_id": "004", "demographics": {"age": 67, "gender": "female", "height_cm": 161, "weight_kg": 90, "handedness": "right", "condition_notes": "IPS akinetic-rigid type"}, "n_sessions_available": 1, "true_label_for_validation_only": "Parkinson's", "diagnostic": {"class_names": ["Healthy", "Parkinson's Disease", "Other Movement Disorder"], "raw_probabilities": [0.3088033199310303, 0.6400761008262634, 0.05112059414386749], "calibrated_probabilities": [0.29167306423187256, 0.7024459838867188, 0.005880945362150669], "predicted_class": "Parkinson's Disease", "predicted_class_confidence_calibrated": 0.7024459838867188}, "cross_body": {"lags": [0, 1, 2, 3], "this_subject_lag_weights": [0.42863839864730835, 0.29652878642082214, 0.18601559102535248, 0.08881722390651703], "dominant_lag": 0, "cohort_lag_weights_reference": {"lag_0": 0.40498119592666626, "lag_1": 0.2977873980998993, "lag_2": 0.1894521713256836, "lag_3": 0.1077791228890419}}, "explainability": {"channel_names": ["Accel X", "Accel Y", "Accel Z", "Gyro X", "Gyro Y", "Gyro Z"], "channel_importance": [0.23077979164812196, 0.15456721197413087, 0.1278041274791571, 0.17320670134535604, 0.17835670327350722, 0.1352854642797269], "task_names": ["PointFinger", "TouchIndex", "TouchNose"], "task_importance": [0.3339034120833219, 0.23341397063021355, 0.43268261728646457], "top_channel": "Accel X"}, "motor_patterns": {"tremor_band_power_ratio": 0.19673575460910797, "tremor_percentile_vs_population": 72.5609756097561, "tremor_severity": "Moderate", "movement_amplitude_rms": 1.5713167190551758, "movement_amplitude_percentile_vs_population": 49.08536585365854, "bradykinesia_severity_percentile": 50.91463414634146, "bradykinesia_severity": "Moderate", "coordination_cross_correlation": 0.25574418161035256, "coordination_percentile_vs_population": 99.39024390243902}, "data_coverage": {"pads_finger_imu": "Available \u2014 real sensor data for this subject", "gaitrec_gait": "NOT available for this subject \u2014 GaitRec and PADS share no subjects. Cross-body analysis uses a fixed, tier-agnostic population gait prototype, not this subject's own gait.", "mpower_tapping_features": "NOT available for this subject \u2014 mPower's branch is trained but not connected to this classifier's decision path (see documentation \u00a73.3/\u00a77.2)."}, "trend": {"available": false, "note": "Single-session dataset \u2014 PADS records exactly one session per subject, so no longitudinal trend can be computed for this or any subject."}}
+</script>
+
+<script>
+(function () {
+  const data = JSON.parse(document.getElementById('report-data').textContent);
+
+  const STATUS = {
+    good:     { color: 'var(--good)',     wash: 'var(--good-wash)' },
+    warning:  { color: 'var(--warning)',  wash: 'var(--warning-wash)' },
+    serious:  { color: 'var(--serious)',  wash: 'var(--serious-wash)' },
+    critical: { color: 'var(--critical)', wash: 'var(--critical-wash)' },
+  };
+
+  // Framing note: this report presents a MOTOR DECLINE PROBABILITY (aggregated
+  // pathological-vs-healthy likelihood), not a named-disease prediction — per
+  // the plan's own "don't overclaim diagnostic specificity" guidance. The
+  // per-class breakdown (Parkinson's-pattern / Other-pattern / Healthy) is
+  // shown only as a secondary, explicitly-labeled "not a diagnosis" detail.
+  const classes0 = data.diagnostic.class_names;
+  const probs0 = data.diagnostic.calibrated_probabilities;
+  const healthyIdx = classes0.indexOf('Healthy');
+  const declineProb = 1 - probs0[healthyIdx];
+  const declinePct = (declineProb * 100).toFixed(1);
+  function declineSeverity(p) {
+    if (p >= 0.6) return 'High';
+    if (p >= 0.3) return 'Moderate';
+    return 'Low';
+  }
+  const SEVERITY_STATUS = { Low: 'good', Moderate: 'warning', High: 'serious' };
+  const declineSev = declineSeverity(declineProb);
+  const declineStatus = STATUS[SEVERITY_STATUS[declineSev]];
+
+  const flowSteps = ["Patient", "Assessment", "Symptom Probability", "Motor Patterns", "Cross-Body", "Explainability", "Coverage", "Trend", "Action"];
+  document.getElementById('flowStrip').innerHTML = flowSteps.map((s, i) =>
+    `<div class="flow-step"><span class="n">${i + 1}</span>${s}</div>`
+  ).join('');
+
+  // ── Masthead ──
+  const d = data.demographics || {};
+  document.getElementById('patientIdBlock').innerHTML =
+    `<b>PADS&#8209;${data.subject_id}</b><br>${d.age ?? '—'}y &middot; ${d.gender ? (d.gender[0].toUpperCase() + d.gender.slice(1)) : '—'} &middot; ${d.handedness ?? '—'}-handed`;
+
+  document.getElementById('riskPill').style.background = declineStatus.wash;
+  document.getElementById('riskPill').style.color = declineStatus.color;
+  document.getElementById('riskPill').innerHTML = `<span class="dot" style="background:${declineStatus.color}"></span>Motor Decline: ${declineSev} · ${declinePct}%`;
+
+  // ── 01 Patient card ──
+  document.getElementById('patientCard').innerHTML = `
+    <dl class="tech-grid">
+      <div><dt>Age / Gender</dt><dd>${d.age ?? '—'} / ${d.gender ?? '—'}</dd></div>
+      <div><dt>Handedness</dt><dd>${d.handedness ?? '—'}</dd></div>
+      <div><dt>Height / Weight</dt><dd>${d.height_cm ?? '—'} cm / ${d.weight_kg ?? '—'} kg</dd></div>
+      <div><dt>Sessions on record</dt><dd>${data.n_sessions_available}</dd></div>
+      <div><dt>Recording tasks</dt><dd>PointFinger, TouchIndex, TouchNose</dd></div>
+      <div><dt>Sample rate</dt><dd>100 Hz &middot; 2928 samples</dd></div>
+    </dl>
+    ${d.condition_notes ? `<div class="exploratory-note" style="margin-top:14px;">Clinical note on file: "${d.condition_notes}"</div>` : ''}
+  `;
+
+  // ── 02 Overall assessment ──
+  const topTaskIdx = data.explainability.task_importance.indexOf(Math.max(...data.explainability.task_importance));
+  const topTask = data.explainability.task_names[topTaskIdx];
+  const topChan = data.explainability.top_channel;
+  document.getElementById('overallLine').innerHTML =
+    `The model detects a <b style="color:${declineStatus.color}">${declineSev.toLowerCase()} probability of motor decline</b>
+     (<b>${declinePct}%</b>, calibrated) from this patient's finger/hand-movement recording — a symptom-probability estimate,
+     not a diagnosis. The <b>${topTask}</b> task and the <b>${topChan}</b> channel contributed most to this estimate.
+     Cross-body analysis (§05) places this patient's finger-movement structure in closest population-level alignment with
+     gait structure at zero temporal offset.`;
+
+  // ── 03 Motor symptom probability: donut (decline vs. no decline) + secondary pattern breakdown ──
+  const classes = data.diagnostic.class_names;
+  const probs = data.diagnostic.calibrated_probabilities;
+  const rawProbs = data.diagnostic.raw_probabilities;
+
+  document.getElementById('donut').style.background =
+    `conic-gradient(${declineStatus.color} 0% ${declinePct}%, var(--surface-2) ${declinePct}% 100%)`;
+  document.getElementById('donut').innerHTML = `<div class="hole"><div class="pct">${declinePct}%</div><div class="lbl">Decline Prob.</div></div>`;
+
+  // Secondary, explicitly non-diagnostic breakdown — neutral sequential coloring, no severity semantics.
+  const PATTERN_COLORS = ['var(--seq-250)', 'var(--seq-450)', 'var(--seq-600)'];
+  document.getElementById('diagLegend').innerHTML =
+    `<div style="font-size:11px; color:var(--muted); text-transform:uppercase; letter-spacing:0.04em; font-weight:600; margin-bottom:2px;">Symptom-pattern breakdown &mdash; not a diagnosis</div>` +
+    classes.map((c, i) => `<div class="legend-row">
+      <span class="sw" style="background:${PATTERN_COLORS[i % PATTERN_COLORS.length]}"></span>
+      <span class="name">${c}-pattern likelihood</span>
+      <span class="val">${(probs[i] * 100).toFixed(1)}%</span>
+    </div>`).join('');
+
+  document.getElementById('confNote').innerHTML =
+    `These three values describe pattern similarity only and are not a diagnostic output. Raw (pre-calibration) probabilities: ${classes.map((c, i) => `${c.split(' ')[0]} <span class="mono">${(rawProbs[i]*100).toFixed(1)}%</span>`).join(' · ')}`;
+
+  // ── 04 Motor patterns ──
+  const mp = data.motor_patterns;
+  const sevStatus = { Low: 'good', Moderate: 'warning', High: 'serious' };
+  function indicatorHTML(name, pct, sevLabel, metaText) {
+    const st = STATUS[sevStatus[sevLabel]];
+    return `<div class="indicator">
+      <div class="gauge" style="background:${st.wash}; color:${st.color};">${Math.round(pct)}<span style="font-size:8px;">th</span></div>
+      <div class="body">
+        <div class="name">${name}<span class="sev-chip" style="background:${st.wash}; color:${st.color};">${sevLabel}</span></div>
+        <div class="meta">${metaText}</div>
+      </div>
+    </div>`;
+  }
+  document.getElementById('motorPatterns').innerHTML =
+    indicatorHTML('Tremor-band signal (3.5&ndash;7Hz)', mp.tremor_percentile_vs_population, mp.tremor_severity,
+      `${mp.tremor_percentile_vs_population.toFixed(1)}th percentile of accelerometer spectral power in the resting-tremor band vs. training population.`) +
+    indicatorHTML('Bradykinesia proxy (movement amplitude)', mp.bradykinesia_severity_percentile, mp.bradykinesia_severity,
+      `Gyroscope RMS at the ${mp.movement_amplitude_percentile_vs_population.toFixed(1)}th population percentile &mdash; lower amplitude scores as more bradykinetic.`) +
+    indicatorHTML('Inter-channel coordination', mp.coordination_percentile_vs_population, mp.coordination_percentile_vs_population > 74 ? 'High' : (mp.coordination_percentile_vs_population > 39 ? 'Moderate' : 'Low'),
+      `Mean cross-channel correlation at the ${mp.coordination_percentile_vs_population.toFixed(1)}th population percentile &mdash; descriptive only, direction of clinical meaning not established here.`);
+
+  // ── 05 Cross-body ──
+  const lags = data.cross_body.lags;
+  const subjLags = data.cross_body.this_subject_lag_weights;
+  const cohortLags = data.cross_body.cohort_lag_weights_reference;
+  const maxLag = Math.max(...subjLags, ...lags.map(l => cohortLags[`lag_${l}`]));
+  document.getElementById('lagCompare').innerHTML = lags.map(l => {
+    const sv = subjLags[l], cv = cohortLags[`lag_${l}`];
+    return `<div class="lag-row">
+      <span class="lag-label">&Delta;=${l}</span>
+      <div class="mini-track"><div class="mini-fill subject" style="width:${(sv/maxLag*100).toFixed(1)}%"></div></div>
+      <div class="mini-track"><div class="mini-fill cohort" style="width:${(cv/maxLag*100).toFixed(1)}%"></div></div>
+    </div>`;
+  }).join('');
+  document.getElementById('lagExplain').innerHTML =
+    `Dominant lag: <b>&Delta;=${data.cross_body.dominant_lag}</b> (${(subjLags[data.cross_body.dominant_lag]*100).toFixed(1)}% weight), matching the cohort-wide dominant lag &mdash;
+     population-level alignment, not a measurement of this patient's own gait (see §07).`;
+
+  // ── 06 SHAP ──
+  function barListHTML(names, values) {
+    const max = Math.max(...values);
+    return names.map((n, i) => `
+      <div class="bar-row">
+        <div class="top"><span class="name">${n}</span><span class="val">${(values[i]*100).toFixed(1)}%</span></div>
+        <div class="bar-track"><div class="bar-fill" style="width:${(values[i]/max*100).toFixed(1)}%"></div></div>
+      </div>`).join('');
+  }
+  document.getElementById('shapChannels').innerHTML = barListHTML(data.explainability.channel_names, data.explainability.channel_importance);
+  document.getElementById('shapTasks').innerHTML = barListHTML(data.explainability.task_names, data.explainability.task_importance);
+
+  // ── 07 Data coverage ──
+  const cov = data.data_coverage;
+  const covRows = [
+    ['PADS finger IMU', cov.pads_finger_imu, 'good'],
+    ['GaitRec gait', cov.gaitrec_gait, 'warning'],
+    ['mPower tapping', cov.mpower_tapping_features, 'warning'],
+  ];
+  document.getElementById('coverageTable').innerHTML = covRows.map(([src, note, st]) => `
+    <tr>
+      <td class="src"><span class="status-dot" style="background:${STATUS[st].color}"></span>${src}</td>
+      <td class="note">${note}</td>
+    </tr>`).join('');
+
+  // ── 08 Trend ──
+  document.getElementById('trendBlock').innerHTML =
+    `<div class="exploratory-note" style="margin-top:0;">${data.trend.note}</div>`;
+
+  // ── 09 Recommended action ──
+  const elevatedDecline = declineSev !== 'Low';
+  const actionItems = [
+    ['Model-based interpretation', `Motor decline probability is ${declineSev.toLowerCase()} (${declinePct}%, calibrated) for this recording — a symptom-probability estimate, not a diagnosis.`],
+    ['Suggested next step', elevatedDecline
+      ? 'Flag for clinical review by a qualified professional; use alongside, not instead of, standard clinical assessment.'
+      : 'No model-flagged concern; continue routine monitoring per standard protocol.'],
+    ['Monitoring frequency', 'Not established &mdash; PADS is a single-session research dataset with no repeat-session protocol defined.'],
+    ['Supportive note', 'General movement-health measures (physiotherapy, activity monitoring) are reasonable regardless of model output, per standard care guidance.'],
+  ];
+  document.getElementById('actionList').innerHTML = actionItems.map(([k, v]) =>
+    `<div class="action-item"><div class="k">${k}</div><div class="v">${v}</div></div>`).join('');
+
+  // ── 10 Technical info ──
+  document.getElementById('techGrid').innerHTML = `
+    <div><dt>Model version</dt><dd>CBDL v1 &middot; Phases 2&ndash;6</dd></div>
+    <div><dt>Total parameters</dt><dd>342,930 + 107,393 (CBDM)</dd></div>
+    <div><dt>PADS clinical head (test)</dt><dd>63.4% acc &middot; 0.618 macro-F1</dd></div>
+    <div><dt>Calibration (ECE)</dt><dd>0.1407 &rarr; 0.1017</dd></div>
+    <div><dt>Cross-body InfoNCE (test)</dt><dd>0.898 (chance: 3.47)</dd></div>
+    <div><dt>SHAP background samples</dt><dd>30 (GradientExplainer)</dd></div>
+  `;
+})();
+</script>

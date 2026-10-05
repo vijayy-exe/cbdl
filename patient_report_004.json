@@ -1,0 +1,102 @@
+{
+  "subject_id": "004",
+  "demographics": {
+    "age": 67,
+    "gender": "female",
+    "height_cm": 161,
+    "weight_kg": 90,
+    "handedness": "right",
+    "condition_notes": "IPS akinetic-rigid type"
+  },
+  "n_sessions_available": 1,
+  "true_label_for_validation_only": "Parkinson's",
+  "diagnostic": {
+    "class_names": [
+      "Healthy",
+      "Parkinson's Disease",
+      "Other Movement Disorder"
+    ],
+    "raw_probabilities": [
+      0.3088033199310303,
+      0.6400761008262634,
+      0.05112059414386749
+    ],
+    "calibrated_probabilities": [
+      0.29167306423187256,
+      0.7024459838867188,
+      0.005880945362150669
+    ],
+    "predicted_class": "Parkinson's Disease",
+    "predicted_class_confidence_calibrated": 0.7024459838867188
+  },
+  "cross_body": {
+    "lags": [
+      0,
+      1,
+      2,
+      3
+    ],
+    "this_subject_lag_weights": [
+      0.42863839864730835,
+      0.29652878642082214,
+      0.18601559102535248,
+      0.08881722390651703
+    ],
+    "dominant_lag": 0,
+    "cohort_lag_weights_reference": {
+      "lag_0": 0.40498119592666626,
+      "lag_1": 0.2977873980998993,
+      "lag_2": 0.1894521713256836,
+      "lag_3": 0.1077791228890419
+    }
+  },
+  "explainability": {
+    "channel_names": [
+      "Accel X",
+      "Accel Y",
+      "Accel Z",
+      "Gyro X",
+      "Gyro Y",
+      "Gyro Z"
+    ],
+    "channel_importance": [
+      0.23077979164812196,
+      0.15456721197413087,
+      0.1278041274791571,
+      0.17320670134535604,
+      0.17835670327350722,
+      0.1352854642797269
+    ],
+    "task_names": [
+      "PointFinger",
+      "TouchIndex",
+      "TouchNose"
+    ],
+    "task_importance": [
+      0.3339034120833219,
+      0.23341397063021355,
+      0.43268261728646457
+    ],
+    "top_channel": "Accel X"
+  },
+  "motor_patterns": {
+    "tremor_band_power_ratio": 0.19673575460910797,
+    "tremor_percentile_vs_population": 72.5609756097561,
+    "tremor_severity": "Moderate",
+    "movement_amplitude_rms": 1.5713167190551758,
+    "movement_amplitude_percentile_vs_population": 49.08536585365854,
+    "bradykinesia_severity_percentile": 50.91463414634146,
+    "bradykinesia_severity": "Moderate",
+    "coordination_cross_correlation": 0.25574418161035256,
+    "coordination_percentile_vs_population": 99.39024390243902
+  },
+  "data_coverage": {
+    "pads_finger_imu": "Available \u2014 real sensor data for this subject",
+    "gaitrec_gait": "NOT available for this subject \u2014 GaitRec and PADS share no subjects. Cross-body analysis uses a fixed, tier-agnostic population gait prototype, not this subject's own gait.",
+    "mpower_tapping_features": "NOT available for this subject \u2014 mPower's branch is trained but not connected to this classifier's decision path (see documentation \u00a73.3/\u00a77.2)."
+  },
+  "trend": {
+    "available": false,
+    "note": "Single-session dataset \u2014 PADS records exactly one session per subject, so no longitudinal trend can be computed for this or any subject."
+  }
+}
